@@ -1,0 +1,4 @@
+# Primary noindex control is the robots meta tag on every HTML page.
+# On project GitHub Pages, this file is not the domain-root robots.txt.
+User-agent: *
+Disallow: /bezalko/
