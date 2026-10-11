@@ -17,6 +17,10 @@ else
 fi
 git -C "$demo_stage" config user.name "$(git config user.name)"
 git -C "$demo_stage" config user.email "$(git config user.email)"
+if command -v gh >/dev/null 2>&1; then
+  git -C "$demo_stage" config credential.https://github.com.helper ""
+  git -C "$demo_stage" config --add credential.https://github.com.helper "!gh auth git-credential"
+fi
 # The temporary directory contains only the dedicated demonstration branch.
 find "$demo_stage" -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
 cp -R dist/. "$demo_stage/"
