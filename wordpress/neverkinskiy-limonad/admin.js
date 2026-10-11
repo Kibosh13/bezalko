@@ -1,0 +1,1 @@
+jQuery(function($){$('.nl-media').on('click',function(){const target=document.getElementById(this.dataset.input);const frame=wp.media({title:'Выберите изображение',button:{text:'Использовать'},multiple:false,library:{type:'image'}});frame.on('select',()=>{const attachment=frame.state().get('selection').first().toJSON();target.value=attachment.url});frame.open()})});

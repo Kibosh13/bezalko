@@ -1,0 +1,48 @@
+# Credentials and environment
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+credentials*.json
+secrets*.json
+wp-config.php
+# Databases and local runtime
+*.sqlite
+*.sqlite3
+*.db
+*.sql
+*.sql.gz
+wp-content/database/
+wp-content/uploads/
+# Dependencies, caches and generated output
+node_modules/
+vendor/
+.cache/
+.npm/
+.pnpm-store/
+dist/
+build/
+coverage/
+artifacts/
+reports/
+.openai/
+.wordpress-playground/
+# Temporary files, logs, archives, OS/editor state
+*.log
+logs/
+tmp/
+temp/
+*.tmp
+*.bak
+*.swp
+*.swo
+*.zip
+*.tar
+*.tar.gz
+.DS_Store
+.AppleDouble/
+.vscode/
+.idea/
