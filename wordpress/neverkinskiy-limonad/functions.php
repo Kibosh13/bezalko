@@ -36,8 +36,8 @@ function nl_template($name) {
 add_shortcode('nl_layout',function($attrs){$attrs=shortcode_atts(['page'=>'home'],$attrs);return nl_template($attrs['page']);});
 add_action('wp_enqueue_scripts',function(){
  $base=get_template_directory_uri();
- wp_enqueue_style('nl-design',$base.'/design.css',[], '1.0.0');
- wp_enqueue_script('nl-app',$base.'/app.js',[], '1.0.0',true);
+ wp_enqueue_style('nl-design',$base.'/design.css',[], '1.0.1');
+ wp_enqueue_script('nl-app',$base.'/app.js',[], '1.0.1',true);
  $o=nl_options();$content=$o;
  // Keep the approved headline typography until it is edited.
  if ($content['hero_title']===nl_defaults()['hero_title']) unset($content['hero_title']);
@@ -73,7 +73,7 @@ function nl_sanitize_products($input){
 }
 add_action('admin_init',function(){register_setting('nl_settings','nl_content',['sanitize_callback'=>'nl_sanitize_content']);register_setting('nl_settings','nl_products',['sanitize_callback'=>'nl_sanitize_products']);});
 add_action('admin_menu',function(){add_menu_page('Контент сайта','НЛ — Контент','manage_options','nl-content','nl_admin','dashicons-food',25);});
-add_action('admin_enqueue_scripts',function($hook){if($hook!=='toplevel_page_nl-content')return;wp_enqueue_media();wp_enqueue_script('nl-admin',get_template_directory_uri().'/admin.js',['jquery'],'1.0.0',true);});
+add_action('admin_enqueue_scripts',function($hook){if($hook!=='toplevel_page_nl-content')return;wp_enqueue_media();wp_enqueue_script('nl-admin',get_template_directory_uri().'/admin.js',['jquery'],'1.0.1',true);});
 function nl_admin(){
  if(!current_user_can('manage_options'))return;$o=nl_options();
  $labels=['hero_title'=>'Заголовок первого экрана','hero_text'=>'Подзаголовок первого экрана','about_short'=>'Компания — краткое описание','about_text'=>'Компания — основное описание','phone'=>'Телефон / факс','mobile'=>'Мобильный телефон','email'=>'Почта и получатель заявок','address'=>'Адрес производства','shop'=>'Адрес магазина и часы работы','cities'=>'Города продаж и сроки','hero_photo'=>'Фото первого экрана','story_photo'=>'Фото в блоке о компании','awards_photo'=>'Фото наград','logo_photo'=>'Логотип'];
@@ -81,7 +81,7 @@ function nl_admin(){
  echo '<table class="form-table">';foreach($labels as $key=>$label){echo '<tr><th><label for="'.esc_attr($key).'">'.esc_html($label).'</label></th><td>';
  if(str_ends_with($key,'_photo')){echo '<input class="regular-text media-url" id="'.esc_attr($key).'" name="nl_content['.esc_attr($key).']" type="url" value="'.esc_attr($o[$key]).'"><button type="button" class="button nl-media" data-input="'.esc_attr($key).'">Выбрать из медиатеки</button>';}
  else{echo '<textarea class="large-text" rows="2" id="'.esc_attr($key).'" name="nl_content['.esc_attr($key).']">'.esc_textarea($o[$key]).'</textarea>';}
- echo '</td></tr>'; }echo '</table><h2>Напитки</h2><p>Пять карточек каталога. Цены не публикуются. Сохраните название и описание в соответствии с этикеткой.</p>';
+ echo '</td></tr>'; }echo '</table><h2>Напитки</h2><p>Карточки каталога. Цены не публикуются. Сохраните название и описание в соответствии с этикеткой.</p>';
  foreach(nl_products() as $p){$id=$p['id'];echo '<h3>'.esc_html($p['name']).'</h3><table class="form-table">';foreach(['name'=>'Название','tag'=>'Короткая подпись','desc'=>'Описание','pack'=>'Упаковка','photo'=>'Фотография'] as $key=>$label){$field='product-'.$id.'-'.$key;echo '<tr><th><label for="'.esc_attr($field).'">'.esc_html($label).'</label></th><td><input class="large-text" id="'.esc_attr($field).'" name="nl_products['.esc_attr($id).']['.esc_attr($key).']" value="'.esc_attr($p[$key]).'">';if($key==='photo')echo '<button type="button" class="button nl-media" data-input="'.esc_attr($field).'">Медиатека</button>';echo '</td></tr>';}
  echo '<tr><th>Категория</th><td><select name="nl_products['.esc_attr($id).'][type]"><option value="lemonade" '.selected($p['type'],'lemonade',false).'>Лимонады</option><option value="kvas" '.selected($p['type'],'kvas',false).'>Квас</option></select></td></tr></table>';}
  echo '<h2>Форма заявки</h2><p>До включения форма готовит письмо в почтовой программе посетителя. После включения отправляет заявку средствами WordPress на почту выше.</p><label><input type="checkbox" name="nl_content[form_enabled]" value="1" '.checked($o['form_enabled'],'1',false).'> Включить серверную отправку после заполнения политики и проверки доставки почты</label>';
