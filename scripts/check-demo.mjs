@@ -14,6 +14,15 @@ for(const f of htmlFiles){const html=fs.readFileSync(path.join(dist,f),'utf8');
  }
 }
 if(errors.length)throw new Error(errors.join('\n'));
+const album=JSON.parse(fs.readFileSync(path.join(root,'wordpress/neverkinskiy-limonad/gallery-album.json'),'utf8'));
+const gallery=fs.readFileSync(path.join(dist,'gallery/index.html'),'utf8');
+const photoLinks=[...gallery.matchAll(/<a\b[^>]*\bdata-gallery-photo\b[^>]*>/g)].map(m=>m[0].match(/href="([^"]+)"/)[1]);
+if(photoLinks.length!==album.photo_count||new Set(photoLinks).size!==album.photo_count)throw new Error('Published gallery photo count mismatch');
+if(album.source_photo_count!==album.photo_count+album.skipped_photos.length)throw new Error('Source album inventory is incomplete');
+for(const p of album.photos){
+ if(!photoLinks.includes(base+'assets/'+p.photo))throw new Error('Photo absent from gallery: '+p.source_name);
+ if(fs.statSync(path.join(dist,'assets',p.photo)).size!==p.bytes)throw new Error('Photo byte size changed during export: '+p.source_name);
+}
 const phpIndex=fs.readFileSync(path.join(root,'wordpress/neverkinskiy-limonad/index.php'),'utf8');
 if(/noindex|nofollow|noarchive/.test(phpIndex))throw new Error('Demo indexing policy must not be in production PHP');
-console.log(`Validated ${htmlFiles.length} HTML files and ${resources.size} internal resource targets. Production PHP has no forced noindex.`);
+console.log(`Validated ${htmlFiles.length} HTML files, ${resources.size} internal resource targets and all ${album.photo_count} selected album photos. Production PHP has no forced noindex.`);

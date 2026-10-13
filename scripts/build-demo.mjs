@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
+import './build-gallery.mjs';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const theme=path.join(root,'wordpress/neverkinskiy-limonad');
 const out=path.join(root,'dist');

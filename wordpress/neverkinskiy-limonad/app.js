@@ -19,3 +19,12 @@ $('#callback-form')?.addEventListener('submit',async e=>{e.preventDefault();cons
 if(config.ajaxUrl&&config.formEnabled){button.disabled=true;status.textContent='Отправляем…';try{const d=new FormData(f);d.append('action','nl_callback');d.append('_ajax_nonce',config.nonce);const r=await fetch(config.ajaxUrl,{method:'POST',body:d});const j=await r.json();if(!j.success)throw new Error(j.data?.message||'Не удалось отправить заявку.');status.textContent='Заявка передана почтовому сервису. Спасибо!';f.reset()}catch(error){status.textContent=error.message+' Позвоните нам по телефону.'}finally{button.disabled=false}}
 else{const email=config.content?.email||'napitkizawod@yandex.ru';window.location.href='mailto:'+encodeURIComponent(email)+'?subject='+encodeURIComponent('Просьба связаться — Неверкинский лимонад')+'&body='+encodeURIComponent('Прошу связаться со мной по телефону: '+phone+'\nСогласен на обработку номера телефона для ответа на это обращение.');status.textContent='Письмо подготовлено. Отправьте его в почтовой программе. Если она не открылась, позвоните нам.'}});
 if(config.formEnabled){$('.form-help').textContent='Укажите номер телефона, чтобы мы могли ответить на ваше обращение.';$('#callback-form button[type="submit"]').textContent='Заказать звонок ↗';$$('.contact-primary .small-note').forEach(x=>x.remove())}
+
+const galleryPhotos=$$('[data-gallery-photo]');const galleryDialog=$('#gallery-dialog');let galleryIndex=0;
+if(galleryDialog&&galleryPhotos.length){
+ const showGallery=(index)=>{galleryIndex=(index+galleryPhotos.length)%galleryPhotos.length;const photo=galleryPhotos[galleryIndex];const image=$('img',photo);$('#gallery-full').src=photo.href;$('#gallery-full').alt=image.alt;$('#gallery-caption').textContent=photo.closest('figure').querySelector('figcaption').textContent;$('#gallery-counter').textContent=`${galleryIndex+1} / ${galleryPhotos.length}`;$('#gallery-original').href=photo.dataset.original};
+ galleryPhotos.forEach((photo,index)=>photo.addEventListener('click',event=>{event.preventDefault();showGallery(index);openDialog(galleryDialog)}));
+ $('[data-gallery-prev]',galleryDialog).addEventListener('click',()=>showGallery(galleryIndex-1));
+ $('[data-gallery-next]',galleryDialog).addEventListener('click',()=>showGallery(galleryIndex+1));
+ galleryDialog.addEventListener('keydown',event=>{if(event.key==='ArrowRight'||event.key==='ArrowLeft'){event.preventDefault();showGallery(galleryIndex+(event.key==='ArrowRight'?1:-1))}});
+}
