@@ -25,4 +25,9 @@ for(const p of album.photos){
 }
 const phpIndex=fs.readFileSync(path.join(root,'wordpress/neverkinskiy-limonad/index.php'),'utf8');
 if(/noindex|nofollow|noarchive/.test(phpIndex))throw new Error('Demo indexing policy must not be in production PHP');
-console.log(`Validated ${htmlFiles.length} HTML files, ${resources.size} internal resource targets and all ${album.photo_count} selected album photos. Production PHP has no forced noindex.`);
+const products=JSON.parse(fs.readFileSync(path.join(dist,'products.json'),'utf8'));
+const catalog=fs.readFileSync(path.join(dist,'catalog/index.html'),'utf8');
+const catalogIds=[...catalog.matchAll(/<article class="product-card"[^>]* id="([^"]+)"/g)].map(m=>m[1]);
+if(catalogIds.length!==products.length||new Set(catalogIds).size!==products.length)throw new Error('Catalogue card count mismatch');
+for(const p of products){if(!catalogIds.includes(p.id)||!p.storage||!['sugar','sweetener','kvas'].includes(p.series))throw new Error('Missing catalogue product details: '+p.id);}
+console.log(`Validated ${htmlFiles.length} HTML files, ${resources.size} internal resource targets, ${products.length} catalogue cards and all ${album.photo_count} selected album photos. Production PHP has no forced noindex.`);

@@ -4,14 +4,15 @@ add_action('after_setup_theme', function() { add_theme_support('title-tag'); add
 function nl_defaults() {
  return [
  'hero_title'=>'Вкус, который собирает вместе.',
- 'hero_text'=>'Лимонады и хлебный квас из Неверкино. Для встреч, разговоров и общего стола.',
+ 'hero_text'=>'Лимонады на сахаре и на заменителе сахара. Хлебный квас живого брожения.',
  'about_short'=>'«Неверкинский лимонад» — производитель безалкогольных напитков в селе Неверкино Пензенской области. Мы выпускаем газированные напитки и хлебный квас.',
  'about_text'=>'Мы выпускаем газированные безалкогольные напитки и хлебный квас. Производство расположено в селе Неверкино, на улице Рабочей, 12В.',
  'phone'=>'+7 (84164) 2-11-10','mobile'=>'+7 (927) 388-38-15','email'=>'napitkizawod@yandex.ru',
  'address'=>'442480, Пензенская область, с. Неверкино, ул. Рабочая, д. 12В',
  'shop'=>'Адрес магазина: [заполнить]. Часы работы офиса и магазина: [заполнить].',
- 'cities'=>'Города и точки продаж: [заполнить]. Сроки получения заказа: [заполнить].',
- 'hero_photo'=>'','story_photo'=>'','awards_photo'=>'','logo_photo'=>'','form_enabled'=>'',
+ 'cities'=>'Поставляем напитки в Самарскую, Московскую и Саратовскую области, а также в Санкт-Петербург. Конкретные точки продаж и сроки получения заказа: [заполнить].',
+ 'director_name'=>'Мянзелин Наиль Сяитович',
+ 'hero_photo'=>'','story_photo'=>'','awards_photo'=>'','logo_photo'=>'','director_photo'=>'','form_enabled'=>'',
  'privacy_term'=>'[заполнить]','privacy_processors'=>'[заполнить]','privacy_responsible'=>'[заполнить]','privacy_host'=>'[заполнить]'
  ];
 }
@@ -36,11 +37,12 @@ function nl_template($name) {
 add_shortcode('nl_layout',function($attrs){$attrs=shortcode_atts(['page'=>'home'],$attrs);return nl_template($attrs['page']);});
 add_action('wp_enqueue_scripts',function(){
  $base=get_template_directory_uri();
- wp_enqueue_style('nl-design',$base.'/design.css',[], '1.0.2');
- wp_enqueue_script('nl-app',$base.'/app.js',[], '1.0.2',true);
+ wp_enqueue_style('nl-design',$base.'/design.css',[], '1.0.3');
+ wp_enqueue_script('nl-app',$base.'/app.js',[], '1.0.3',true);
  $o=nl_options();$content=$o;
  // Keep the approved headline typography until it is edited.
  if ($content['hero_title']===nl_defaults()['hero_title']) unset($content['hero_title']);
+ if ($content['director_name']===nl_defaults()['director_name']) unset($content['director_name']);
  wp_add_inline_script('nl-app','window.NL_CONFIG='.wp_json_encode(['assetBase'=>$base.'/assets/','products'=>nl_products(),'content'=>$content,'ajaxUrl'=>admin_url('admin-ajax.php'),'nonce'=>wp_create_nonce('nl_callback'),'formEnabled'=>!empty($o['form_enabled']),'contactsUrl'=>home_url('/contacts/')]).';','before');
 });
 add_action('after_switch_theme',function(){
@@ -64,26 +66,27 @@ function nl_sanitize_content($input){
 }
 function nl_sanitize_products($input){
  $out=[];foreach(nl_products() as $p){$id=$p['id'];if(!isset($input[$id]))continue;
-  foreach(['name','tag','desc','pack','photo','type'] as $key){$v=$input[$id][$key]??'';
-   if($key==='photo')$out[$id][$key]=preg_match('~^https?://~',$v)?esc_url_raw($v):sanitize_file_name($v);
-   elseif($key==='type')$out[$id][$key]=$v==='kvas'?'kvas':'lemonade';
+  foreach(['name','tag','desc','pack','photo','series','storage'] as $key){$v=$input[$id][$key]??$p[$key]??'';
+   if($key==='photo')$out[$id][$key]=preg_match('~^https?://~',$v)?esc_url_raw($v):preg_replace('~[^a-zA-Z0-9_./-]~','',$v);
+   elseif($key==='series')$out[$id][$key]=in_array($v,['sugar','sweetener','kvas'],true)?$v:$p['series'];
    else $out[$id][$key]=sanitize_textarea_field($v);
   }
+  $out[$id]['type']=$out[$id]['series']==='kvas'?'kvas':'lemonade';
  }return $out;
 }
 add_action('admin_init',function(){register_setting('nl_settings','nl_content',['sanitize_callback'=>'nl_sanitize_content']);register_setting('nl_settings','nl_products',['sanitize_callback'=>'nl_sanitize_products']);});
 add_action('admin_menu',function(){add_menu_page('Контент сайта','НЛ — Контент','manage_options','nl-content','nl_admin','dashicons-food',25);});
-add_action('admin_enqueue_scripts',function($hook){if($hook!=='toplevel_page_nl-content')return;wp_enqueue_media();wp_enqueue_script('nl-admin',get_template_directory_uri().'/admin.js',['jquery'],'1.0.2',true);});
+add_action('admin_enqueue_scripts',function($hook){if($hook!=='toplevel_page_nl-content')return;wp_enqueue_media();wp_enqueue_script('nl-admin',get_template_directory_uri().'/admin.js',['jquery'],'1.0.3',true);});
 function nl_admin(){
  if(!current_user_can('manage_options'))return;$o=nl_options();
- $labels=['hero_title'=>'Заголовок первого экрана','hero_text'=>'Подзаголовок первого экрана','about_short'=>'Компания — краткое описание','about_text'=>'Компания — основное описание','phone'=>'Телефон / факс','mobile'=>'Мобильный телефон','email'=>'Почта и получатель заявок','address'=>'Адрес производства','shop'=>'Адрес магазина и часы работы','cities'=>'Города продаж и сроки','hero_photo'=>'Фото первого экрана','story_photo'=>'Фото в блоке о компании','awards_photo'=>'Фото наград','logo_photo'=>'Логотип'];
+ $labels=['hero_title'=>'Заголовок первого экрана','hero_text'=>'Подзаголовок первого экрана','about_short'=>'Компания — краткое описание','about_text'=>'Компания — основное описание','phone'=>'Телефон / факс','mobile'=>'Мобильный телефон','email'=>'Почта и получатель заявок','address'=>'Адрес производства','shop'=>'Адрес магазина и часы работы','cities'=>'География поставок и сроки','director_name'=>'ФИО директора','hero_photo'=>'Фото первого экрана','story_photo'=>'Фото в блоке о компании','awards_photo'=>'Фото наград','logo_photo'=>'Логотип','director_photo'=>'Фото директора'];
  echo '<div class="wrap"><h1>Содержание сайта</h1><p>Тексты, контакты и фотографии меняются здесь. Дополнительные блоки и политику редактируйте в разделе «Страницы».</p><form method="post" action="options.php">';settings_fields('nl_settings');
  echo '<table class="form-table">';foreach($labels as $key=>$label){echo '<tr><th><label for="'.esc_attr($key).'">'.esc_html($label).'</label></th><td>';
  if(str_ends_with($key,'_photo')){echo '<input class="regular-text media-url" id="'.esc_attr($key).'" name="nl_content['.esc_attr($key).']" type="url" value="'.esc_attr($o[$key]).'"><button type="button" class="button nl-media" data-input="'.esc_attr($key).'">Выбрать из медиатеки</button>';}
  else{echo '<textarea class="large-text" rows="2" id="'.esc_attr($key).'" name="nl_content['.esc_attr($key).']">'.esc_textarea($o[$key]).'</textarea>';}
  echo '</td></tr>'; }echo '</table><h2>Напитки</h2><p>Карточки каталога. Цены не публикуются. Сохраните название и описание в соответствии с этикеткой.</p>';
- foreach(nl_products() as $p){$id=$p['id'];echo '<h3>'.esc_html($p['name']).'</h3><table class="form-table">';foreach(['name'=>'Название','tag'=>'Короткая подпись','desc'=>'Описание','pack'=>'Упаковка','photo'=>'Фотография'] as $key=>$label){$field='product-'.$id.'-'.$key;echo '<tr><th><label for="'.esc_attr($field).'">'.esc_html($label).'</label></th><td><input class="large-text" id="'.esc_attr($field).'" name="nl_products['.esc_attr($id).']['.esc_attr($key).']" value="'.esc_attr($p[$key]).'">';if($key==='photo')echo '<button type="button" class="button nl-media" data-input="'.esc_attr($field).'">Медиатека</button>';echo '</td></tr>';}
- echo '<tr><th>Категория</th><td><select name="nl_products['.esc_attr($id).'][type]"><option value="lemonade" '.selected($p['type'],'lemonade',false).'>Лимонады</option><option value="kvas" '.selected($p['type'],'kvas',false).'>Квас</option></select></td></tr></table>';}
+ foreach(nl_products() as $p){$id=$p['id'];echo '<h3>'.esc_html($p['name']).' — '.esc_html($p['tag']).'</h3><table class="form-table">';foreach(['name'=>'Название','tag'=>'Короткая подпись','desc'=>'Описание','pack'=>'Упаковка','storage'=>'Срок хранения','photo'=>'Фотография'] as $key=>$label){$field='product-'.$id.'-'.$key;echo '<tr><th><label for="'.esc_attr($field).'">'.esc_html($label).'</label></th><td><input class="large-text" id="'.esc_attr($field).'" name="nl_products['.esc_attr($id).']['.esc_attr($key).']" value="'.esc_attr($p[$key]).'">';if($key==='photo')echo '<button type="button" class="button nl-media" data-input="'.esc_attr($field).'">Медиатека</button>';echo '</td></tr>';}
+ echo '<tr><th>Линейка</th><td><select name="nl_products['.esc_attr($id).'][series]">';foreach(['sugar'=>'На сахаре','sweetener'=>'На заменителе сахара','kvas'=>'Квас'] as $value=>$label)echo '<option value="'.esc_attr($value).'" '.selected($p['series'],$value,false).'>'.esc_html($label).'</option>';echo '</select></td></tr></table>';}
  echo '<h2>Форма заявки</h2><p>До включения форма готовит письмо в почтовой программе посетителя. После включения отправляет заявку средствами WordPress на почту выше.</p><label><input type="checkbox" name="nl_content[form_enabled]" value="1" '.checked($o['form_enabled'],'1',false).'> Включить серверную отправку после заполнения политики и проверки доставки почты</label>';
  foreach(['privacy_term','privacy_processors','privacy_responsible','privacy_host'] as $key)echo '<input type="hidden" name="nl_content['.esc_attr($key).']" value="'.esc_attr($o[$key]).'">';
  submit_button('Сохранить изменения');echo '</form></div>';
