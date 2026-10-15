@@ -1,0 +1,57 @@
+[
+  {
+    "source_file": "1.pdf",
+    "pdf": "recognition/thanks-governor.pdf",
+    "preview": "recognition/thanks-governor.jpg",
+    "width": 1132,
+    "height": 1600,
+    "kind": "thanks",
+    "preview_rotation": 0,
+    "pdf_bytes": 3344125,
+    "pdf_sha256": "93cb4f233bc90f910342425560b4f9a4eefd15388614d7546290fa43adc55d98"
+  },
+  {
+    "source_file": "2.pdf",
+    "pdf": "recognition/thanks-svo.pdf",
+    "preview": "recognition/thanks-svo.jpg",
+    "width": 1600,
+    "height": 1132,
+    "kind": "featured",
+    "preview_rotation": 90,
+    "pdf_bytes": 4085043,
+    "pdf_sha256": "6e1c1dd38ec5b2ea93634940e2deffe5b0d431db08c8bc39b45f48ee0beef3d6"
+  },
+  {
+    "source_file": "3.pdf",
+    "pdf": "recognition/thanks-art-school.pdf",
+    "preview": "recognition/thanks-art-school.jpg",
+    "width": 1132,
+    "height": 1600,
+    "kind": "thanks",
+    "preview_rotation": 0,
+    "pdf_bytes": 1703813,
+    "pdf_sha256": "a07049edd958058beece5ea06068569c7d5d5492839dfbf3c47f039430cbf4ea"
+  },
+  {
+    "source_file": "4.pdf",
+    "pdf": "recognition/thanks-zdes-vse.pdf",
+    "preview": "recognition/thanks-zdes-vse.jpg",
+    "width": 1132,
+    "height": 1600,
+    "kind": "thanks",
+    "preview_rotation": 0,
+    "pdf_bytes": 1859812,
+    "pdf_sha256": "ecd83f666f2c05cdcab2ccde333454fac72d0f9ccc4976e6aabab6646d7aadcb"
+  },
+  {
+    "source_file": "5.pdf",
+    "pdf": "recognition/membership-chamber.pdf",
+    "preview": "recognition/membership-chamber.jpg",
+    "width": 1600,
+    "height": 1132,
+    "kind": "membership",
+    "preview_rotation": 90,
+    "pdf_bytes": 2973655,
+    "pdf_sha256": "9e53fa46ce4f2547d84c71465c9be8d764abb20c03370b0f0a6c966864a1b617"
+  }
+]
