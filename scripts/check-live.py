@@ -30,7 +30,7 @@ for path in ['/cms/seed.json','/.env','/.env.local','/.git/config','/unknown-pag
 status,headers,_=fetch('/admin/');assert status in [200,302]
 if origin.scheme=='https':
  assert status==200 and 'noindex' in headers.get('x-robots-tag','') and headers.get('cache-control')=='no-store'
- status,_,body=fetch('/admin/api.php?action=session');assert status==200 and json.loads(body)['setup_required']
+ status,_,body=fetch('/admin/api.php?action=session');assert status==200 and json.loads(body)['ok'] and json.loads(body)['user'] is None
  status,_,_=fetch('/admin/api.php?action=state');assert status==401
 status,headers,_=fetch('/assets/workshop.mp4',headers={'Range':'bytes=0-1023'});assert status==206 and headers.get('content-range','').startswith('bytes 0-1023/')
 def resource(path):
