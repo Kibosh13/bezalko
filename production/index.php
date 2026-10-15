@@ -2,6 +2,7 @@
 declare(strict_types=1);
 require __DIR__.'/cms/core.php';
 try{
+ \NL\redirect_when_https_ready();
  $path=parse_url($_SERVER['REQUEST_URI'],PHP_URL_PATH)?:'/';
  if($path==='/robots.txt'){header('Content-Type: text/plain; charset=utf-8');$s=\NL\doc('settings')['value'];echo 'User-agent: *'."\n".(empty($s['indexing'])?'Disallow: /':"Allow: /\nDisallow: /admin/\nDisallow: /cms/")."\nSitemap: ".$s['origin']."/sitemap.xml\n";exit;}
  if($path==='/sitemap.xml'){header('Content-Type: application/xml; charset=utf-8');$s=\NL\doc('settings')['value'];echo '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';foreach(\NL\db()->query("SELECT value,updated_at FROM documents WHERE name LIKE 'page:%'") as $row){$page=json_decode($row['value'],true);if(!$page['published']||$page['seo']['noindex']||!$s['indexing'])continue;echo '<url><loc>'.\NL\e($s['origin'].'/'.($page['slug']?$page['slug'].'/':'')).'</loc><lastmod>'.\NL\e(substr($row['updated_at'],0,10)).'</lastmod></url>';}echo '</urlset>';exit;}

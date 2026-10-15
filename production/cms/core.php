@@ -7,6 +7,18 @@ require __DIR__.'/collections.php';
 function root(): string { return dirname(__DIR__); }
 function data_dir(): string { return getenv('NL_DATA_DIR') ?: dirname(root()).'/.neverlimonad-data'; }
 function e(mixed $s): string { return htmlspecialchars((string)$s, ENT_QUOTES|ENT_SUBSTITUTE, 'UTF-8'); }
+function redirect_when_https_ready(): void {
+ if((!empty($_SERVER['HTTPS'])&&$_SERVER['HTTPS']!=='off')||!in_array($_SERVER['REQUEST_METHOD']??'',['GET','HEAD'],true))return;
+ $origin=doc('settings')['value']['origin'];$host=parse_url($origin,PHP_URL_HOST);
+ if(parse_url($origin,PHP_URL_SCHEME)!=='https'||!$host||strtolower($_SERVER['HTTP_HOST']??'')!==strtolower($host))return;
+ $file=data_dir().'/https.json';$cache=is_file($file)?json_decode(@file_get_contents($file)?:'{}',true):[];
+ if(($cache['host']??'')!==$host||($cache['expires']??0)<time()){
+  $context=stream_context_create(['ssl'=>['verify_peer'=>true,'verify_peer_name'=>true,'peer_name'=>$host,'SNI_enabled'=>true]]);
+  $connection=@stream_socket_client('ssl://'.$host.':443',$number,$error,1,STREAM_CLIENT_CONNECT,$context);$ready=is_resource($connection);if($ready)fclose($connection);
+  $cache=['host'=>$host,'ready'=>$ready,'expires'=>time()+($ready?3600:60)];@file_put_contents($file,json_encode($cache),LOCK_EX);@chmod($file,0600);
+ }
+ if(!empty($cache['ready'])){header('Location: '.$origin.($_SERVER['REQUEST_URI']??'/'),true,301);exit;}
+}
 function json(mixed $data, int $status=200): never { http_response_code($status);header('Content-Type: application/json; charset=utf-8');header('Cache-Control: no-store');echo json_encode($data,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_THROW_ON_ERROR);exit; }
 function fail(string $message, int $status=400): never { json(['ok'=>false,'error'=>$message],$status); }
 function db(): \PDO {

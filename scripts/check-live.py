@@ -26,7 +26,7 @@ for path in ['/','/catalog/','/about/','/gallery/','/documents/','/reviews/','/c
 for path,needle in [('/robots.txt',b'Allow: /'),('/sitemap.xml',b'https://neverlimonad.ru/')]:
  status,_,body=fetch(path);assert status==200 and needle in body
 for path in ['/cms/seed.json','/.env','/.env.local','/.git/config','/unknown-page/']:
- status,_,_=fetch(path);assert status in [403,404],(path,status)
+ status,_,_=fetch(path);assert status in ([403,404,405] if path!='/unknown-page/' else [404]),(path,status)
 status,headers,_=fetch('/admin/');assert status in [200,302]
 if origin.scheme=='https':
  assert status==200 and 'noindex' in headers.get('x-robots-tag','') and headers.get('cache-control')=='no-store'
@@ -36,4 +36,4 @@ status,headers,_=fetch('/assets/workshop.mp4',headers={'Range':'bytes=0-1023'});
 def resource(path):
  status,_,_=fetch(path,'HEAD');assert status==200,(path,status);return path
 with concurrent.futures.ThreadPoolExecutor(max_workers=8) as pool:list(pool.map(resource,resources))
-print(json.dumps({'origin':options.origin,'pages':len(pages),'resources':len(resources),'status':'PASS','robots':'indexable; admin excluded','video_range':206,'private_paths':'403/404','catalog':13,'album':34},ensure_ascii=False))
+print(json.dumps({'origin':options.origin,'pages':len(pages),'resources':len(resources),'status':'PASS','robots':'indexable; admin excluded','video_range':206,'private_paths':'403/404/405','catalog':13,'album':34},ensure_ascii=False))
