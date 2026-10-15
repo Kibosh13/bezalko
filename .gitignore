@@ -46,3 +46,8 @@ temp/
 .AppleDouble/
 .vscode/
 .idea/
+# Production instance data and deployment packages
+.neverlimonad-data/
+production/assets/
+production/uploads/
+production/cms/seed.json

@@ -1,0 +1,20 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+import {execFileSync} from 'node:child_process';
+import './build-gallery.mjs';
+import './build-catalog.mjs';
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+const theme=path.join(root,'wordpress/neverkinskiy-limonad');
+const out=path.join(root,'build/production');
+fs.rmSync(out,{recursive:true,force:true});fs.mkdirSync(out,{recursive:true});
+fs.cpSync(path.join(root,'production'),out,{recursive:true});
+fs.cpSync(path.join(theme,'assets'),path.join(out,'assets'),{recursive:true});
+fs.copyFileSync(path.join(theme,'design.css'),path.join(out,'assets/site.css'));
+let js=fs.readFileSync(path.join(theme,'app.js'),'utf8');
+if(!js.includes('const assetUrl=(photo)=>')||!js.includes("$('#gallery-original').href=photo.dataset.original"))throw Error('Frontend patch target changed');
+js=js.replace('const assetUrl=(photo)=>',"const assetUrl=(photo)=>photo.startsWith('/')?photo:")
+.replace("$('#gallery-original').href=photo.dataset.original","const originalLink=$('#gallery-original');originalLink.hidden=!photo.dataset.original;if(photo.dataset.original)originalLink.href=photo.dataset.original");
+fs.writeFileSync(path.join(out,'assets/site.js'),js);
+execFileSync('php',[path.join(root,'production/cms/seed.php'),theme,path.join(out,'cms/seed.json')],{stdio:'inherit'});
+console.log('Production prepared at '+out+'; no runtime data or passwords included.');
