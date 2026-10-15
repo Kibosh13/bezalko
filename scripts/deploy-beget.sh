@@ -20,7 +20,10 @@ mkdir -p "$TASK_PARENT/deployment-backups"
 chmod 700 "$TASK_PARENT/deployment-backups"
 tar -czf "$TASK_PARENT/deployment-backups/site-$TASK_STAMP.tar.gz" -C "$TASK_DEST" .
 chmod 600 "$TASK_PARENT/deployment-backups/site-$TASK_STAMP.tar.gz"
-rsync -a --exclude=uploads/ --exclude=router.php --exclude=public/ build/production/ "$TASK_DEST/"
+TASK_EXTRA=()
+# Hosting PHP/HTTPS directives may be added to .htaccess after the first deployment.
+if [[ -f "$TASK_DATA/cms.sqlite" ]]; then TASK_EXTRA+=(--exclude=/.htaccess); fi
+rsync -a --exclude=uploads/ --exclude=router.php --exclude=public/ "${TASK_EXTRA[@]}" build/production/ "$TASK_DEST/"
 if [[ ! -f "$TASK_DATA/cms.sqlite" ]]; then
   NL_DATA_DIR="$TASK_DATA" php "$TASK_DEST/cms/install.php" "$TASK_HASH"
 fi
