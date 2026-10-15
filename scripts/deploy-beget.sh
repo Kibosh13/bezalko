@@ -14,7 +14,12 @@ if [[ ! -f "$TASK_DATA/cms.sqlite" && ! "$TASK_HASH" =~ ^[a-f0-9]{64}$ ]]; then
   echo 'First installation requires the SHA-256 of a random one-time setup key.' >&2; exit 1
 fi
 cd "$TASK_SOURCE"
-node scripts/build-production.mjs
+if [[ -x /usr/local/php-cgi/8.4/bin/php ]]; then export PATH="/usr/local/php-cgi/8.4/bin:$PATH"; fi
+if command -v node >/dev/null; then
+  node scripts/build-production.mjs
+elif [[ ! -f build/production/cms/seed.json ]]; then
+  echo 'Build locally and copy build/production into this private checkout first; Node.js is unavailable on this host.' >&2; exit 1
+fi
 # Backup stays outside the public root. Existing uploads and content are preserved.
 mkdir -p "$TASK_PARENT/deployment-backups"
 chmod 700 "$TASK_PARENT/deployment-backups"
