@@ -2,6 +2,7 @@ Options -Indexes
 DirectoryIndex index.php
 RewriteEngine On
 RewriteRule ^(?:cms|\.git|\.env|\.neverlimonad-data)(?:/|$) - [F,L]
+RewriteRule ^\.env(?:\.|/|$) - [F,L,NC]
 RewriteRule ^uploads/.*\.(?:php[0-9]?|phtml|phar|cgi|pl|sh|html?|svg)$ - [F,L,NC]
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
